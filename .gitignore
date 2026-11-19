@@ -1,0 +1,17 @@
+# API 키·비밀값 
+.env
+.env.*
+*.secret.js
+functions/.runtimeconfig.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Node
+node_modules/
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+.vscode/
