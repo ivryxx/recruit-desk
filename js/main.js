@@ -1,29 +1,67 @@
-/* main.js — 초기 화면: 리서치 카드 목록과 국가 필터 */
+/* main.js — 초기 화면: 세계 시계, 리서치 카드 목록, 국가 필터 */
 
 let activeCountry = "ALL";
 
-function renderFilters() {
-  const bar = document.getElementById("filterBar");
-  const countries = [...new Map(STUDIES.map((s) => [s.country, s.countryName])).entries()];
+/* ---------- 세계 시계 ---------- */
+const RESEARCHER = { flag: "kr", tz: "Asia/Seoul", name: { ko: "서울 · 리서처", en: "Seoul · Researcher" } };
 
-  const buttons = [["ALL", null], ...countries].map(([code, name]) => {
-    const label = code === "ALL" ? t("filterAll") : loc(name);
-    const pressed = code === activeCountry;
-    return `<button type="button" class="chip${pressed ? " is-active" : ""}"
-              data-country="${code}" aria-pressed="${pressed}">${esc(label)}</button>`;
+function clockRows() {
+  const seen = new Set();
+  const rows = [RESEARCHER];
+  STUDIES.forEach((s) => {
+    if (s.status === "open" && !seen.has(s.country)) {
+      seen.add(s.country);
+      rows.push({ flag: s.flag, tz: s.tz, name: s.countryName });
+    }
   });
-  bar.innerHTML = buttons.join("");
+  return rows;
 }
 
-function cardHTML(s) {
+function renderClocks() {
+  const now = new Date();
+  const locale = currentLang === "ko" ? "ko-KR" : "en-US";
+  document.getElementById("clocks").innerHTML = clockRows().map((c) => {
+    const p = {};
+    new Intl.DateTimeFormat("en-GB", { timeZone: c.tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(now).forEach((x) => { p[x.type] = x.value; });
+    const minutes = (Number(p.hour) % 24) * 60 + Number(p.minute);
+    const isDay = minutes >= 7 * 60 && minutes < 19 * 60;
+    const time = new Intl.DateTimeFormat(locale, { timeZone: c.tz, hour: "2-digit", minute: "2-digit" }).format(now);
+    return `
+      <li class="clock">
+        <span class="clock-flag">${flagImg(c.flag)}</span>
+        <span class="clock-name">${esc(loc(c.name))}</span>
+        <span class="clock-time">${esc(time)}</span>
+        <span class="clock-icon" title="${isDay ? "day" : "night"}">${isDay ? "☀️" : "🌙"}</span>
+        <span class="day-bar"><span style="left:${(minutes / 1440) * 100}%"></span></span>
+      </li>`;
+  }).join("");
+}
+
+/* ---------- 필터 ---------- */
+function renderFilters() {
+  const bar = document.getElementById("filterBar");
+  const countries = [...new Map(STUDIES.map((s) => [s.country, s])).values()];
+
+  const all = `<button type="button" class="chip${activeCountry === "ALL" ? " is-active" : ""}"
+                 data-country="ALL" aria-pressed="${activeCountry === "ALL"}">${esc(t("filterAll"))}</button>`;
+  bar.innerHTML = all + countries.map((s) => {
+    const pressed = s.country === activeCountry;
+    return `<button type="button" class="chip${pressed ? " is-active" : ""}"
+              data-country="${s.country}" aria-pressed="${pressed}">${flagImg(s.flag)} ${esc(loc(s.countryName))}</button>`;
+  }).join("");
+}
+
+/* ---------- 카드 ---------- */
+function cardHTML(s, i) {
   const remain = Math.max(0, s.quota - s.filled);
   const closed = s.status === "closed" || remain === 0;
   const pct = Math.round((s.filled / s.quota) * 100);
 
   return `
-    <article class="study-card${closed ? " is-closed" : ""}">
+    <article class="study-card${closed ? " is-closed" : ""}" style="--i:${i}">
       <div class="card-top">
-        <span class="badge badge-country">${esc(s.country)} · ${esc(loc(s.countryName))}</span>
+        <span class="badge badge-country">${flagImg(s.flag)} ${esc(loc(s.countryName))}</span>
         <span class="badge ${closed ? "badge-closed" : "badge-open"}">
           ${t(closed ? "statusClosed" : "statusOpen")}
         </span>
@@ -62,6 +100,7 @@ function renderStudies() {
 
 function renderAll() {
   applyI18n();
+  renderClocks();
   renderFilters();
   renderStudies();
 }
@@ -69,6 +108,7 @@ function renderAll() {
 document.addEventListener("DOMContentLoaded", () => {
   initLangToggle();
   renderAll();
+  setInterval(renderClocks, 30 * 1000);
 
   // 필터 버튼: 이벤트 위임
   document.getElementById("filterBar").addEventListener("click", (e) => {

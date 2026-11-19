@@ -24,11 +24,19 @@
   <main>
     <!-- 소개 영역 -->
     <section class="hero">
-      <div class="container">
-        <p class="eyebrow" data-i18n="heroEyebrow">Global UX Research</p>
-        <h1 class="hero-title" data-i18n="heroTitle"></h1>
-        <p class="hero-desc" data-i18n="heroDesc"></p>
-        <a class="btn btn-primary" href="#studies" data-i18n="heroCta">참여 가능한 리서치 보기</a>
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <p class="eyebrow" data-i18n="heroEyebrow">Global UX Research</p>
+          <h1 class="hero-title" data-i18n="heroTitle"></h1>
+          <p class="hero-desc" data-i18n="heroDesc"></p>
+          <a class="btn btn-primary" href="#studies" data-i18n="heroCta">참여 가능한 리서치 보기</a>
+        </div>
+
+        <!-- 세계 시계: 리서치 국가의 현재 시각 (JS 로 생성, 30초마다 갱신) -->
+        <div class="clock-card">
+          <p class="clock-title" data-i18n="clockTitle">지금 리서치 국가는 몇 시?</p>
+          <ul id="clocks" class="clock-list"></ul>
+        </div>
       </div>
     </section>
 
@@ -77,6 +85,7 @@
 
   <script src="./js/i18n.js"></script>
   <script src="./js/data.js"></script>
+  <script src="./js/ui.js"></script>
   <script src="./js/main.js"></script>
 </body>
 </html>

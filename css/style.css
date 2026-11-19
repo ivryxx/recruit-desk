@@ -19,6 +19,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }   /* display 를 지정한 요소도 hidden 이면 숨김 */
 
 body {
   font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -195,3 +196,170 @@ button { font: inherit; cursor: pointer; }
   .hero-title { font-size: 42px; }
   .study-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* =====================================================================
+   비주얼 개선 (3주차 추가)
+   ===================================================================== */
+
+/* ---------- 소개: 세계 시계 카드 ---------- */
+.hero-inner { display: grid; gap: 32px; align-items: center; }
+.clock-card {
+  background: linear-gradient(160deg, #1b2a4a 0%, #24365e 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 12px 30px rgba(27, 42, 74, 0.25);
+}
+.clock-title { font-size: 13px; font-weight: 700; color: #a9c4ff; margin-bottom: 12px; }
+.clock-list { list-style: none; display: grid; gap: 10px; }
+.clock {
+  display: grid;
+  grid-template-columns: 24px 1fr auto 24px;
+  grid-template-areas: "flag name time icon" ". bar bar bar";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.clock:first-child { background: rgba(49, 130, 246, 0.28); }
+.clock-flag { grid-area: flag; font-size: 18px; }
+.clock-name { grid-area: name; font-size: 14px; }
+.clock-time { grid-area: time; font-weight: 700; font-variant-numeric: tabular-nums; }
+.clock-icon { grid-area: icon; text-align: center; }
+/* 하루 막대: 밤(어두움) → 낮(밝음) → 밤, 점이 현재 시각 */
+.day-bar {
+  grid-area: bar;
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3b4a6b 0%, #3b4a6b 25%, #ffd76a 40%, #ffd76a 70%, #3b4a6b 85%, #3b4a6b 100%);
+}
+.day-bar span {
+  position: absolute;
+  top: 50%;
+  width: 10px; height: 10px;
+  margin-left: -5px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* ---------- 카드: 순서대로 떠오르기, hover, 막대 차오르기 ---------- */
+.study-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: rise 0.45s ease backwards;          /* backwards: 끝난 뒤엔 hover 효과가 적용되도록 */
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.study-card:not(.is-closed):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+.quota-bar span {
+  transform-origin: left center;
+  animation: grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms + 250ms);
+}
+.btn { transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.btn:active:not(.btn-disabled) { transform: scale(0.98); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ---------- 진행 단계 ---------- */
+.stepper {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.stepper li { display: flex; align-items: center; gap: 6px; color: var(--text-weak); flex: 1; }
+.stepper li:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  margin: 0 8px;
+  background: var(--line);
+  border-radius: 2px;
+}
+.stepper li.is-done:not(:last-child)::after { background: var(--primary); }
+.step-dot {
+  flex: 0 0 auto;
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--text-sub);
+  font-weight: 700;
+  font-size: 12px;
+  transition: background 0.3s, color 0.3s;
+}
+.stepper li.is-done .step-dot { background: var(--primary); color: #fff; }
+.stepper li.is-current { color: var(--text); font-weight: 700; }
+.stepper li.is-current .step-dot { background: var(--primary-soft); color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.step-label { white-space: nowrap; }
+
+/* ---------- 체크 아이콘 그리기 ---------- */
+.check-svg { width: 64px; height: 64px; }
+.check-svg circle {
+  fill: var(--success-soft);
+  stroke: var(--success);
+  stroke-width: 2;
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: draw 0.6s ease forwards;
+}
+.check-svg path {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: draw 0.4s 0.5s ease forwards;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* ---------- 토스트 알림 ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  background: var(--text);
+  color: #fff;
+  font-size: 14px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 50;
+  max-width: calc(100% - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 넓은 화면 ---------- */
+@media (min-width: 860px) {
+  .hero-inner { grid-template-columns: 1.2fr 1fr; gap: 48px; }
+}
+@media (max-width: 420px) {
+  .step-label { display: none; }
+  .stepper li.is-current .step-label { display: inline; }
+}
+
+/* 움직임 줄이기 설정을 켠 사용자에게는 애니메이션을 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .check-svg circle, .check-svg path { stroke-dashoffset: 0; }
+}
+
+/* 국기 이미지 */
+.flag { display: inline-block; width: 20px; height: 15px; object-fit: cover; border-radius: 3px; vertical-align: -2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.badge .flag, .chip .flag { width: 16px; height: 12px; margin-right: 2px; }
+.clock-flag .flag { width: 22px; height: 16px; }

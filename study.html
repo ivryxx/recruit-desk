@@ -26,6 +26,7 @@
 
     <!-- 리서치 정보 (JS 로 채움) -->
     <section id="studyHead" class="study-head"></section>
+    <div id="stepper"></div>
 
     <div class="study-layout">
       <!-- 왼쪽: 안내 -->
@@ -42,7 +43,16 @@
 
       <!-- 오른쪽: 동의 + 사전 설문 -->
       <section class="panel form-panel">
+        <!-- 제출 후 적격 판정 결과 (JS 로 채움) -->
+        <div id="resultBox" class="result-box" role="status" hidden></div>
+
         <form id="screenerForm" novalidate>
+          <!-- 이전에 작성하던 응답을 불러왔을 때 -->
+          <div id="restoreBar" class="restore-bar" hidden>
+            <span data-i18n="restored">이전에 작성하던 응답을 불러왔어요.</span>
+            <button type="button" id="restartBtn" class="btn-link" data-i18n="restart">처음부터 다시</button>
+          </div>
+
           <div class="consent">
             <h2 class="panel-title" data-i18n="consentTitle">개인정보 수집·이용 동의</h2>
             <p class="consent-body" data-i18n="consentBody"></p>
@@ -58,6 +68,7 @@
           <!-- 질문은 data.js 의 screener 데이터로 생성 -->
           <div id="questions" class="questions"></div>
 
+          <p id="saveStatus" class="save-status" hidden></p>
           <p id="formMsg" class="form-msg" role="alert" hidden></p>
           <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">응답 제출</button>
         </form>
@@ -71,6 +82,8 @@
 
   <script src="./js/i18n.js"></script>
   <script src="./js/data.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/eligibility.js"></script>
   <script src="./js/study.js"></script>
 </body>
 </html>

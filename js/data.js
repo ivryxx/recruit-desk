@@ -10,6 +10,8 @@ const STUDIES = [
     id: "jp-remit",
     status: "open",
     country: "JP",
+    flag: "jp",
+    tz: "Asia/Tokyo",
     countryName: { ko: "일본", en: "Japan" },
     title: { ko: "일본 거주자의 해외 송금 경험 인터뷰", en: "Cross-border money transfers: interviews in Japan" },
     summary: {
@@ -66,6 +68,8 @@ const STUDIES = [
     id: "vn-onboarding",
     status: "open",
     country: "VN",
+    flag: "vn",
+    tz: "Asia/Ho_Chi_Minh",
     countryName: { ko: "베트남", en: "Vietnam" },
     title: { ko: "베트남 신규 가입자 온보딩 사용성 테스트", en: "Onboarding usability test in Vietnam" },
     summary: {
@@ -113,6 +117,8 @@ const STUDIES = [
     id: "us-cards",
     status: "open",
     country: "US",
+    flag: "us",
+    tz: "America/New_York",
     countryName: { ko: "미국", en: "United States" },
     title: { ko: "미국 대학생의 카드·간편결제 사용 설문", en: "Card and mobile payment habits of US students" },
     summary: {
@@ -154,6 +160,8 @@ const STUDIES = [
     id: "tw-merchant",
     status: "closed",
     country: "TW",
+    flag: "tw",
+    tz: "Asia/Taipei",
     countryName: { ko: "대만", en: "Taiwan" },
     title: { ko: "대만 소상공인 결제 단말 사용 경험", en: "Payment terminals for small merchants in Taiwan" },
     summary: {
