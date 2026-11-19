@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruit Desk · 인터뷰 예약</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/study.css">
+  <link rel="stylesheet" href="./css/booking.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="./index.html">Recruit<span>Desk</span></a>
+      <nav class="header-nav">
+        <a href="./index.html#studies" data-i18n="navStudies">리서치 목록</a>
+        <button id="langBtn" class="lang-btn" type="button" data-i18n="langBtn">English</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container study-page">
+    <a id="backLink" class="back-link" href="./index.html" data-i18n="backToScreener">← 설문으로</a>
+    <section id="studyHead" class="study-head"></section>
+    <div id="stepper"></div>
+
+    <!-- 예약 전: 시간대 타임라인 + 슬롯 목록 + 선택 확인 -->
+    <div id="bookingArea" class="booking-layout">
+      <section class="panel">
+        <div class="book-top">
+          <div>
+            <h2 class="panel-title" data-i18n="bookTitle">인터뷰 시간 예약</h2>
+            <p class="panel-desc" data-i18n="bookDesc"></p>
+          </div>
+          <label class="tz-select">
+            <span data-i18n="tzChange">다른 시간대로 보기</span>
+            <select id="tzSelect"></select>
+          </label>
+        </div>
+
+        <div id="dayTabs" class="day-tabs" role="tablist"></div>
+
+        <!-- 24시간 타임라인 (JS 로 생성) -->
+        <div id="timeline" class="timeline"></div>
+
+        <ul class="legend">
+          <li><i class="lg lg-ok"></i><span data-i18n="legendOk"></span></li>
+          <li><i class="lg lg-night"></i><span data-i18n="legendNight"></span></li>
+          <li><i class="lg lg-full"></i><span data-i18n="legendFull"></span></li>
+          <li><i class="lg lg-overlap"></i><span data-i18n="legendOverlap"></span></li>
+        </ul>
+
+        <h3 class="sub-title" data-i18n="slotsTitle">예약 가능한 시간</h3>
+        <div id="slotList" class="slot-list"></div>
+      </section>
+
+      <aside id="confirmBox" class="panel confirm-panel"></aside>
+    </div>
+
+    <!-- 예약 후: 완료 화면 -->
+    <section id="doneBox" class="panel done-panel" hidden></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" data-i18n="footer">Recruit Desk</div>
+  </footer>
+
+  <script src="./js/i18n.js"></script>
+  <script src="./js/data.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/booking.js"></script>
+</body>
+</html>
