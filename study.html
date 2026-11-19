@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruit Desk · 리서치 상세</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/study.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="./index.html">Recruit<span>Desk</span></a>
+      <nav class="header-nav">
+        <a href="./index.html#studies" data-i18n="navStudies">리서치 목록</a>
+        <button id="langBtn" class="lang-btn" type="button" data-i18n="langBtn">English</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container study-page">
+    <a class="back-link" href="./index.html#studies" data-i18n="back">← 목록으로</a>
+
+    <!-- 리서치 정보 (JS 로 채움) -->
+    <section id="studyHead" class="study-head"></section>
+
+    <div class="study-layout">
+      <!-- 왼쪽: 안내 -->
+      <aside class="panel info-panel">
+        <h2 class="panel-title" data-i18n="aboutTitle">리서치 안내</h2>
+        <dl id="studyInfo" class="info-list"></dl>
+
+        <div class="tz-box">
+          <p class="tz-label" data-i18n="tzLabel">감지된 내 시간대</p>
+          <p id="tzValue" class="tz-value"></p>
+          <p class="tz-hint" data-i18n="tzHint"></p>
+        </div>
+      </aside>
+
+      <!-- 오른쪽: 동의 + 사전 설문 -->
+      <section class="panel form-panel">
+        <form id="screenerForm" novalidate>
+          <div class="consent">
+            <h2 class="panel-title" data-i18n="consentTitle">개인정보 수집·이용 동의</h2>
+            <p class="consent-body" data-i18n="consentBody"></p>
+            <label class="check">
+              <input type="checkbox" id="consent" name="consent">
+              <span data-i18n="consentCheck">위 내용을 확인했으며 동의합니다.</span>
+            </label>
+          </div>
+
+          <h2 class="panel-title" data-i18n="screenerTitle">사전 설문</h2>
+          <p class="panel-desc" data-i18n="screenerDesc"></p>
+
+          <!-- 질문은 data.js 의 screener 데이터로 생성 -->
+          <div id="questions" class="questions"></div>
+
+          <p id="formMsg" class="form-msg" role="alert" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">응답 제출</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" data-i18n="footer">Recruit Desk</div>
+  </footer>
+
+  <script src="./js/i18n.js"></script>
+  <script src="./js/data.js"></script>
+  <script src="./js/study.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+/* study.css — 리서치 상세·사전 설문 화면 */
+
+.study-page { padding-top: 20px; padding-bottom: 56px; }
+.back-link { display: inline-block; font-size: 14px; color: var(--text-sub); margin-bottom: 16px; }
+.back-link:hover { color: var(--primary); }
+
+.study-head { margin-bottom: 20px; }
+.study-title { font-size: 24px; line-height: 1.35; letter-spacing: -0.4px; margin: 8px 0; }
+.study-summary { color: var(--text-sub); }
+.notice {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-sub);
+}
+
+.study-layout { display: grid; gap: 16px; }
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.panel-title { font-size: 17px; margin-bottom: 8px; }
+.panel-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 16px; }
+
+/* 안내 */
+.info-list { display: grid; gap: 12px; font-size: 14px; }
+.info-list dt { color: var(--text-weak); font-size: 13px; }
+.tz-box {
+  margin-top: 20px;
+  padding: 14px;
+  background: var(--primary-soft);
+  border-radius: 12px;
+}
+.tz-label { font-size: 12px; color: var(--primary); font-weight: 700; }
+.tz-value { font-weight: 700; margin: 2px 0; word-break: break-all; }
+.tz-hint { font-size: 12px; color: var(--text-sub); }
+
+/* 동의 */
+.consent {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+.consent-body {
+  font-size: 13px;
+  color: var(--text-sub);
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+/* 질문 */
+.questions { display: grid; gap: 16px; margin-bottom: 20px; }
+.question {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+.question.has-error { border-color: var(--danger); background: var(--danger-soft); }
+.question legend { font-weight: 700; font-size: 15px; padding: 0 4px; }
+.q-num { color: var(--primary); margin-right: 6px; }
+.options { display: grid; gap: 8px; margin-top: 8px; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 14px;
+}
+.option:hover { border-color: var(--primary); }
+.option:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.option input { accent-color: var(--primary); }
+textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--primary-soft); border-color: var(--primary); }
+
+.form-msg { font-size: 14px; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.form-msg.error { background: var(--danger-soft); color: var(--danger); }
+.form-msg.success { background: var(--success-soft); color: var(--success); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* PC: 안내는 왼쪽 고정, 설문은 오른쪽 */
+@media (min-width: 860px) {
+  .study-title { font-size: 30px; }
+  .study-layout { grid-template-columns: 320px 1fr; align-items: start; }
+  .info-panel { position: sticky; top: 76px; }
+}
