@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruit Desk</title>
+  <meta name="description" content="글로벌 유저 인터뷰 리크루팅·스케줄링 웹 서비스">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="./index.html">Recruit<span>Desk</span></a>
+      <nav class="header-nav">
+        <a href="#studies" data-i18n="navStudies">리서치 목록</a>
+        <button id="langBtn" class="lang-btn" type="button" data-i18n="langBtn">English</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- 소개 영역 -->
+    <section class="hero">
+      <div class="container">
+        <p class="eyebrow" data-i18n="heroEyebrow">Global UX Research</p>
+        <h1 class="hero-title" data-i18n="heroTitle"></h1>
+        <p class="hero-desc" data-i18n="heroDesc"></p>
+        <a class="btn btn-primary" href="#studies" data-i18n="heroCta">참여 가능한 리서치 보기</a>
+      </div>
+    </section>
+
+    <!-- 참여 방법 3단계 -->
+    <section class="steps">
+      <div class="container">
+        <h2 class="section-title" data-i18n="stepsTitle">참여 방법</h2>
+        <ol class="step-list">
+          <li class="step">
+            <span class="step-num">1</span>
+            <h3 data-i18n="step1T"></h3>
+            <p data-i18n="step1D"></p>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <h3 data-i18n="step2T"></h3>
+            <p data-i18n="step2D"></p>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <h3 data-i18n="step3T"></h3>
+            <p data-i18n="step3D"></p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 리서치 목록 (JS 로 생성) -->
+    <section id="studies" class="studies">
+      <div class="container">
+        <div class="list-head">
+          <h2 class="section-title">
+            <span data-i18n="listTitle">모집 중인 리서치</span>
+            <span id="studyCount" class="count"></span>
+          </h2>
+          <div id="filterBar" class="filter-bar" role="group" aria-label="country filter"></div>
+        </div>
+        <div id="studyGrid" class="study-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" data-i18n="footer">Recruit Desk</div>
+  </footer>
+
+  <script src="./js/i18n.js"></script>
+  <script src="./js/data.js"></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>
