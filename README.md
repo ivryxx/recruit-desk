@@ -15,6 +15,7 @@
 | 적격 판정, 응답 임시저장, 결과 화면 | 완료 (3주차) |
 | GitHub Pages 배포 | 완료 (3주차) |
 | 세계 시계, 카드 애니메이션, 진행 단계 표시 | 완료 (3주차) |
+| 점 세계지도, 핵심 지표, 차트 (Chart.js) | 완료 (3주차) |
 | 시간대 타임라인 인터뷰 예약, 예약 완료·복사 | 완료 (3주차, localStorage) |
 | Firestore 연동 | 4주차 |
 | 리서처 대시보드, AI 노트 요약 | 5주차 |
@@ -34,7 +35,14 @@ js/study.js       상세 렌더링, 분기 설문, 제출 검사, 임시저장, 
 js/eligibility.js 리서치별 적격 판정 규칙
 js/ui.js          국기, 진행 단계, 토스트, 체크 아이콘, 복사
 js/booking.js     슬롯 생성, 시간대 변환, 타임라인, 예약
+js/insights.js    세계지도, 핵심 지표, 차트
+js/worldmap-data.js 세계지도 점 데이터 (Natural Earth 기반 자동 생성)
 ```
 
 ## 실행
 별도 빌드 없이 `index.html`을 열거나 VS Code Live Server로 실행한다.
+
+## 사용한 외부 자원
+- [Chart.js](https://www.chartjs.org/) 4.4.1 (CDN): 차트. 불러오지 못하면 표로 대신 보여준다.
+- [Natural Earth](https://www.naturalearthdata.com/) / world-atlas: 세계지도 육지 모양 (점 격자로 변환해 포함)
+- [flagcdn.com](https://flagcdn.com/): 국기 이미지
