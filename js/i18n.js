@@ -115,6 +115,21 @@ const I18N = {
     seoulFmt: "서울 {time}",
     nightTag: "현지 밤",
     earlyTag: "현지 이른 아침",
+    tzChangeShort: "변경",
+    keyDay: "내 활동 시간 (현지 8–22시)",
+    keyWork: "리서처 근무 (서울 9–18시)",
+    axis0: "자정",
+    axis6: "오전 6시",
+    axis12: "정오",
+    axis18: "오후 6시",
+    legendSelected: "선택함",
+    slotCountFmt: "{n}개",
+    showTakenFmt: "마감 {n}개도 보기",
+    groupDawn: "새벽",
+    groupMorning: "오전",
+    groupAfternoon: "오후",
+    groupEvening: "저녁",
+    bookShort: "예약하기",
     full: "마감",
     noSlots: "이 날은 예약 가능한 시간이 없어요.",
     pickHint: "시간을 고르면 여기에 표시돼요.",
@@ -242,6 +257,21 @@ const I18N = {
     seoulFmt: "Seoul {time}",
     nightTag: "Night",
     earlyTag: "Early morning",
+    tzChangeShort: "Change",
+    keyDay: "Your day (8am–10pm local)",
+    keyWork: "Researcher hours (Seoul 9am–6pm)",
+    axis0: "12am",
+    axis6: "6am",
+    axis12: "12pm",
+    axis18: "6pm",
+    legendSelected: "Selected",
+    slotCountFmt: "{n}",
+    showTakenFmt: "Show {n} taken",
+    groupDawn: "Late night",
+    groupMorning: "Morning",
+    groupAfternoon: "Afternoon",
+    groupEvening: "Evening",
+    bookShort: "Book",
     full: "Taken",
     noSlots: "No times available on this day.",
     pickHint: "Your selected time will appear here.",
@@ -295,6 +325,9 @@ function applyI18n(root = document) {
   });
   root.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  root.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    el.setAttribute("aria-label", t(el.dataset.i18nAria));
   });
 }
 

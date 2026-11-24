@@ -27,17 +27,23 @@
     <section id="studyHead" class="study-head"></section>
     <div id="stepper"></div>
 
-    <!-- 예약 전: 시간대 타임라인 + 슬롯 목록 + 선택 확인 -->
+    <!-- 예약 전: 시간대 + 날짜 + 타임라인 + 시간 선택 / 오른쪽 선택 확인 -->
     <div id="bookingArea" class="booking-layout">
-      <section class="panel">
-        <div class="book-top">
-          <div>
-            <h2 class="panel-title" data-i18n="bookTitle">인터뷰 시간 예약</h2>
-            <p class="panel-desc" data-i18n="bookDesc"></p>
+      <section class="panel book-panel">
+        <h2 class="panel-title" data-i18n="bookTitle">인터뷰 시간 예약</h2>
+        <p class="panel-desc" data-i18n="bookDesc"></p>
+
+        <!-- 표시 기준 시간대 -->
+        <div class="tz-bar">
+          <span class="tz-ico" aria-hidden="true">🌏</span>
+          <div class="tz-text">
+            <small data-i18n="tzMine">표시 기준 시간대</small>
+            <b id="tzName"></b>
           </div>
-          <label class="tz-select">
-            <span data-i18n="tzChange">다른 시간대로 보기</span>
-            <select id="tzSelect"></select>
+          <span id="tzNow" class="tz-now"></span>
+          <label class="tz-change">
+            <span data-i18n="tzChangeShort">변경</span>
+            <select id="tzSelect" data-i18n-aria="tzChange"></select>
           </label>
         </div>
 
@@ -46,23 +52,26 @@
         <!-- 24시간 타임라인 (JS 로 생성) -->
         <div id="timeline" class="timeline"></div>
 
-        <ul class="legend">
-          <li><i class="lg lg-ok"></i><span data-i18n="legendOk"></span></li>
-          <li><i class="lg lg-night"></i><span data-i18n="legendNight"></span></li>
-          <li><i class="lg lg-full"></i><span data-i18n="legendFull"></span></li>
-          <li><i class="lg lg-overlap"></i><span data-i18n="legendOverlap"></span></li>
-        </ul>
-
-        <h3 class="sub-title" data-i18n="slotsTitle">예약 가능한 시간</h3>
+        <div class="slot-head">
+          <h3 class="sub-title" data-i18n="slotsTitle">예약 가능한 시간</h3>
+          <label id="takenToggle" class="switch">
+            <input type="checkbox" id="showTaken">
+            <span class="switch-ui" aria-hidden="true"></span>
+            <span id="takenLabel"></span>
+          </label>
+        </div>
         <div id="slotList" class="slot-list"></div>
       </section>
 
-      <aside id="confirmBox" class="panel confirm-panel"></aside>
+      <aside id="confirmBox" class="panel confirm-panel" aria-live="polite"></aside>
     </div>
 
     <!-- 예약 후: 완료 화면 -->
     <section id="doneBox" class="panel done-panel" hidden></section>
   </main>
+
+  <!-- 모바일: 시간을 고르면 화면 아래에 고정되는 예약 바 -->
+  <div id="mobileBar" class="mobile-bar" hidden></div>
 
   <footer class="site-footer">
     <div class="container" data-i18n="footer">Recruit Desk</div>

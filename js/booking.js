@@ -140,6 +140,8 @@ function renderHead() {
 }
 
 function renderTzSelect() {
+  document.getElementById("tzName").textContent = `${viewTz()} · ${utcOffsetLabel(viewTz())}`;
+  document.getElementById("tzNow").textContent = timeIn(Date.now(), viewTz());
   const sel = document.getElementById("tzSelect");
   sel.innerHTML = TZ_OPTIONS.map((tz) => {
     const label = tz === "auto"
@@ -149,16 +151,28 @@ function renderTzSelect() {
   }).join("");
 }
 
-/* ---------- 화면: 날짜 탭 ---------- */
+/* ---------- 화면: 날짜 탭 (달력 칩) ---------- */
+function dateParts(ts, tz) {
+  const p = {};
+  new Intl.DateTimeFormat(locale(), { timeZone: tz, month: "short", day: "numeric", weekday: "short" })
+    .formatToParts(ts).forEach((x) => { p[x.type] = x.value; });
+  return p;
+}
+
 function renderDayTabs(days) {
   if (!activeDay || !days.has(activeDay)) activeDay = [...days.keys()][0];
+  let lastMonth = "";
   document.getElementById("dayTabs").innerHTML = [...days.entries()].map(([date, items]) => {
     const open = items.filter((s) => !s.taken).length;
     const active = date === activeDay;
-    return `<button type="button" role="tab" class="day-tab${active ? " is-active" : ""}"
-              data-day="${date}" aria-selected="${active}">
-              <span class="day-name">${esc(dayLabel(items[0].start, viewTz()))}</span>
-              <span class="day-left">${fmt("leftFmt", { n: open })}</span>
+    const p = dateParts(items[0].start, viewTz());
+    const showMonth = p.month !== lastMonth;           // 달이 바뀌는 첫 칸에만 월 표시
+    lastMonth = p.month;
+    return `<button type="button" role="tab" class="day-tab${active ? " is-active" : ""}${open ? "" : " is-empty"}"
+              data-day="${date}" aria-selected="${active}" aria-label="${esc(dayLabel(items[0].start, viewTz()))}">
+              <span class="dt-wd">${esc(showMonth ? `${p.month} · ${p.weekday}` : p.weekday)}</span>
+              <span class="dt-d">${esc(p.day)}</span>
+              <span class="dt-n">${open ? fmt("slotCountFmt", { n: open }) : t("full")}</span>
             </button>`;
   }).join("");
 }
@@ -169,86 +183,164 @@ function slotState(s) {
   return s.night ? "is-night" : "is-ok";
 }
 
+/* 시각을 '10:30' 처럼 (오전/오후는 그룹 이름이 대신 보여준다) */
+function clockOnly(ts, tz) {
+  return new Intl.DateTimeFormat(locale(), { timeZone: tz, hour: "numeric", minute: "2-digit", hour12: true })
+    .formatToParts(ts).filter((x) => x.type === "hour" || x.type === "minute" || x.type === "literal")
+    .map((x) => x.value).join("").replace(/^[^\d]+|[^\d]+$/g, "");
+}
+
+/* 보고 있는 시간대가 서울과 같은 시각이면 '서울 ○시' 보조 표시는 생략 */
+function sameAsSeoul(ts) {
+  return wallClock(ts, viewTz()).min === wallClock(ts, RESEARCHER_TZ).min;
+}
+
 function renderTimeline(items) {
   const segs = workSegments(items);
-  const overlaps = segs
-    .map((g) => ({ start: Math.max(g.start, AWAKE.start), end: Math.min(g.end, AWAKE.end) }))
-    .filter((g) => g.end > g.start);
-
-  // 오늘이면 현재 시각 선 표시
   const now = wallClock(Date.now(), viewTz());
   const nowLine = now.date === activeDay ? `<span class="tl-now" style="left:${pct(now.min)}"></span>` : "";
-
-  const ticks = [0, 3, 6, 9, 12, 15, 18, 21, 24]
-    .map((h) => `<span style="left:${pct(h * 60)}">${h}</span>`).join("");
+  const axis = [[0, "axis0"], [6, "axis6"], [12, "axis12"], [18, "axis18"], [24, "axis0"]]
+    .map(([h, k]) => `<span style="left:${pct(h * 60)}">${t(k)}</span>`).join("");
 
   document.getElementById("timeline").innerHTML = `
-    <div class="tl-grid">
-      <div class="tl-label"><b>${t("rowAwake")}</b><small>${t("rowAwakeSub")}</small></div>
-      <div class="tl-track tl-awake">
-        <span class="tl-band" style="left:${pct(AWAKE.start)};width:${pct(AWAKE.end - AWAKE.start)}"></span>
-      </div>
-
-      <div class="tl-label"><b>${t("rowWork")}</b><small>${t("rowWorkSub")} 9–18</small></div>
-      <div class="tl-track tl-work">
-        ${segs.map((g) => `<span class="tl-band" style="left:${pct(g.start)};width:${pct(g.end - g.start)}"></span>`).join("")}
-      </div>
-
-      <div class="tl-label"><b>${t("rowSlots")}</b></div>
-      <div class="tl-track tl-slots">
-        ${items.map((s) => `
-          <button type="button" class="tl-slot ${slotState(s)}${s.id === selectedId ? " is-selected" : ""}"
-                  style="left:${pct(s.startMin)};width:${pct(s.endMin - s.startMin)}"
-                  data-id="${s.id}" ${s.taken ? "disabled" : ""}
-                  title="${esc(timeIn(s.start, viewTz()))} · ${esc(fmt("seoulFmt", { time: timeIn(s.start, RESEARCHER_TZ) }))}"></button>`).join("")}
-      </div>
-
-      <!-- 겹치는 구간을 세 줄 위에 반투명하게 덮어 표시 -->
-      <div class="tl-cover">
-        ${overlaps.map((g) => `<span style="left:${pct(g.start)};width:${pct(g.end - g.start)}"></span>`).join("")}
-        ${nowLine}
-      </div>
-
-      <div class="tl-axis">${ticks}</div>
-    </div>`;
+    <div class="tl-keys">
+      <span><i class="k k-day"></i>${t("keyDay")}</span>
+      <span><i class="k k-work"></i>${t("keyWork")}</span>
+    </div>
+    <div class="tl-bar">
+      <span class="tl-day" style="left:${pct(AWAKE.start)};width:${pct(AWAKE.end - AWAKE.start)}"></span>
+      ${[AWAKE.start / 2, (AWAKE.end + 1440) / 2]
+        .filter((m) => !items.some((s) => s.endMin > m - 60 && s.startMin < m + 60))
+        .map((m) => `<span class="tl-moon" style="left:${pct(m)}">🌙</span>`).join("")}
+      ${segs.map((g) => `<span class="tl-work" style="left:${pct(g.start)};width:${pct(g.end - g.start)}"></span>`).join("")}
+      ${items.map((s) => `
+        <button type="button" class="tl-tick ${slotState(s)}${s.id === selectedId ? " is-selected" : ""}"
+                style="left:${pct(s.startMin)};width:${pct(Math.min(s.endMin, 1440) - s.startMin)}"
+                data-id="${s.id}" ${s.taken ? "disabled" : ""}
+                aria-label="${esc(timeIn(s.start, viewTz()))}"
+                title="${esc(timeIn(s.start, viewTz()))}${sameAsSeoul(s.start) ? "" : ` · ${esc(fmt("seoulFmt", { time: timeIn(s.start, RESEARCHER_TZ) }))}`}"></button>`).join("")}
+      ${nowLine}
+    </div>
+    <div class="tl-axis">${axis}</div>
+    <ul class="legend">
+      <li><i class="lg lg-ok"></i>${t("legendOk")}</li>
+      <li><i class="lg lg-night"></i>${t("legendNight")}</li>
+      <li><i class="lg lg-full"></i>${t("legendFull")}</li>
+      <li><i class="lg lg-sel"></i>${t("legendSelected")}</li>
+    </ul>`;
 }
 
-/* ---------- 화면: 슬롯 목록 ---------- */
+/* ---------- 화면: 슬롯 목록 (시간대별 묶음 + 작은 칩) ---------- */
+const GROUPS = [
+  { key: "groupDawn", icon: "🌙", from: 0, to: 6 * 60 },
+  { key: "groupMorning", icon: "🌅", from: 6 * 60, to: 12 * 60 },
+  { key: "groupAfternoon", icon: "☀️", from: 12 * 60, to: 18 * 60 },
+  { key: "groupEvening", icon: "🌆", from: 18 * 60, to: 24 * 60 }
+];
+let showTaken = false;
+let lastViewKey = "";
+
+function clock24(ts, tz) {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(ts);
+}
+
+function chipHTML(s, i) {
+  const sub = sameAsSeoul(s.start) ? "" : `<small>${esc(fmt("seoulFmt", { time: clock24(s.start, RESEARCHER_TZ) }))}</small>`;
+  const icon = !s.taken && s.night
+    ? `<i class="chip-dot" title="${esc(s.early ? t("earlyTag") : t("nightTag"))}" aria-label="${esc(s.early ? t("earlyTag") : t("nightTag"))}"></i>` : "";
+  return `
+    <button type="button" class="tchip ${slotState(s)}${s.id === selectedId ? " is-selected" : ""}"
+            data-id="${s.id}" ${s.taken ? `disabled aria-label="${esc(t("full"))}"` : ""} style="--i:${i}">
+      <b>${esc(clockOnly(s.start, viewTz()))}</b>${icon}${sub}
+    </button>`;
+}
+
 function renderSlotList(items) {
   const box = document.getElementById("slotList");
-  if (!items.length) {
-    box.innerHTML = `<p class="empty">${t("noSlots")}</p>`;
+  const takenCount = items.filter((s) => s.taken).length;
+  document.getElementById("takenToggle").hidden = takenCount === 0;
+  document.getElementById("takenLabel").textContent = fmt("showTakenFmt", { n: takenCount });
+
+  const visible = items.filter((s) => showTaken || !s.taken);
+  if (!visible.length) {
+    box.innerHTML = `<div class="slots-empty">🗓️<p>${t("noSlots")}</p></div>`;
     return;
   }
-  box.innerHTML = items.map((s, i) => `
-    <button type="button" class="slot ${slotState(s)}${s.id === selectedId ? " is-selected" : ""}"
-            data-id="${s.id}" ${s.taken ? "disabled" : ""} style="--i:${i}">
-      <span class="slot-time">${esc(timeIn(s.start, viewTz()))}</span>
-      <span class="slot-sub">${esc(fmt("seoulFmt", { time: timeIn(s.start, RESEARCHER_TZ) }))}</span>
-      ${s.taken ? `<span class="slot-tag">${t("full")}</span>`
-        : s.night ? `<span class="slot-tag">${s.early ? "🌅 " + t("earlyTag") : "🌙 " + t("nightTag")}</span>` : ""}
-    </button>`).join("");
+  let i = 0;
+  box.innerHTML = GROUPS.map((g) => {
+    const list = visible.filter((s) => s.startMin >= g.from && s.startMin < g.to);
+    if (!list.length) return "";
+    const open = list.filter((s) => !s.taken).length;
+    return `
+      <div class="slot-group">
+        <p class="group-label"><span>${g.icon}</span>${t(g.key)}<em>${fmt("slotCountFmt", { n: open })}</em></p>
+        <div class="tchips">${list.map((s) => chipHTML(s, i++)).join("")}</div>
+      </div>`;
+  }).join("");
 }
 
-/* ---------- 화면: 선택 확인 ---------- */
+/* ---------- 화면: 선택 확인 (PC: 오른쪽 카드, 모바일: 하단 고정 바) ---------- */
+function dayPeriod(ts, tz) {
+  const part = new Intl.DateTimeFormat(locale(), { timeZone: tz, hour: "numeric", hour12: true })
+    .formatToParts(ts).find((x) => x.type === "dayPeriod");
+  return part ? part.value : "";
+}
+function rangeText(s, tz) {
+  const end = dayPeriod(s.start, tz) === dayPeriod(s.end, tz) ? clockOnly(s.end, tz) : timeIn(s.end, tz);
+  return `${timeIn(s.start, tz)} – ${end}`;
+}
+function longDay(ts, tz) {
+  return new Intl.DateTimeFormat(locale(), { timeZone: tz, month: "long", day: "numeric", weekday: "long" }).format(ts);
+}
+
 function renderConfirm() {
   const box = document.getElementById("confirmBox");
+  const bar = document.getElementById("mobileBar");
   const s = SLOTS.find((x) => x.id === selectedId);
+
   if (!s) {
     box.innerHTML = `
-      <h3 class="panel-title">${t("confirmTitle")}</h3>
-      <div class="confirm-empty">🗓️<p>${t("pickHint")}</p></div>`;
+      <p class="cf-eyebrow">${t("confirmTitle")}</p>
+      <div class="confirm-empty">
+        <div class="ce-ico">🗓️</div>
+        <p>${t("pickHint")}</p>
+      </div>
+      <dl class="cf-meta">
+        <div><dt>${t("method")}</dt><dd>${esc(loc(study.method))}</dd></div>
+        <div><dt>${t("duration")}</dt><dd>${fmt("durationFmt", { n: study.durationMin })}</dd></div>
+      </dl>`;
+    bar.hidden = true;
+    document.body.classList.remove("has-bar");
     return;
   }
+
+  const seoul = sameAsSeoul(s.start) ? "" : `
+      <div class="cf-seoul">
+        <span>${t("seoulTime")}</span>
+        <b>${esc(longDay(s.start, RESEARCHER_TZ))} · ${esc(rangeText(s, RESEARCHER_TZ))}</b>
+      </div>`;
   box.innerHTML = `
-    <h3 class="panel-title">${t("confirmTitle")}</h3>
-    <div class="confirm-time">
-      <p class="ct-label">${t("myTime")} · ${esc(viewTz())}</p>
-      <p class="ct-main">${esc(fullDate(s.start, viewTz()))}</p>
-      <p class="ct-label">${t("seoulTime")}</p>
-      <p class="ct-sub">${esc(fullDate(s.start, RESEARCHER_TZ))}</p>
+    <p class="cf-eyebrow">${t("confirmTitle")}</p>
+    <div class="cf-card">
+      <p class="cf-day">${esc(longDay(s.start, viewTz()))}</p>
+      <p class="cf-time">${esc(rangeText(s, viewTz()))}</p>
+      <p class="cf-tz">${esc(viewTz())} · ${esc(utcOffsetLabel(viewTz()))}</p>
+      ${seoul}
     </div>
-    <button type="button" id="bookBtn" class="btn btn-primary btn-block">${t("confirmBtn")}</button>`;
+    <dl class="cf-meta">
+      <div><dt>${t("method")}</dt><dd>${esc(loc(study.method))}</dd></div>
+      <div><dt>${t("duration")}</dt><dd>${fmt("durationFmt", { n: study.durationMin })}</dd></div>
+    </dl>
+    <button type="button" class="btn btn-primary btn-block" data-action="book">${t("confirmBtn")}</button>`;
+
+  bar.innerHTML = `
+    <div class="mb-text">
+      <small>${esc(longDay(s.start, viewTz()))}</small>
+      <b>${esc(rangeText(s, viewTz()))}</b>
+    </div>
+    <button type="button" class="btn btn-primary" data-action="book">${t("bookShort")}</button>`;
+  bar.hidden = false;
+  document.body.classList.add("has-bar");
 }
 
 /* ---------- 화면: 예약 완료 ---------- */
@@ -263,6 +355,8 @@ function bookingText(b) {
 
 function renderDone(b) {
   document.getElementById("bookingArea").hidden = true;
+  document.getElementById("mobileBar").hidden = true;
+  document.body.classList.remove("has-bar");
   const box = document.getElementById("doneBox");
   box.hidden = false;
   box.innerHTML = `
@@ -308,6 +402,14 @@ function renderBooking() {
   renderTzSelect();
   renderDayTabs(days);
   const items = days.get(activeDay) || [];
+
+  // 날짜·시간대·마감 보기가 바뀔 때만 등장 애니메이션 (시간을 고를 때마다 깜빡이지 않게)
+  const viewKey = `${activeDay}|${viewTz()}|${showTaken}|${currentLang}`;
+  const animate = viewKey !== lastViewKey;
+  lastViewKey = viewKey;
+  document.getElementById("timeline").classList.toggle("no-anim", !animate);
+  document.getElementById("slotList").classList.toggle("no-anim", !animate);
+
   renderTimeline(items);
   renderSlotList(items);
   renderConfirm();
@@ -344,27 +446,31 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBooking();
   });
 
-  // 타임라인 막대와 목록 버튼 모두 같은 방식으로 선택
+  document.getElementById("showTaken").addEventListener("change", (e) => {
+    showTaken = e.target.checked;
+    renderBooking();
+  });
+
+  // 타임라인 눈금과 목록 칩 모두 같은 방식으로 선택
   document.getElementById("bookingArea").addEventListener("click", (e) => {
     const slot = e.target.closest("[data-id]");
     if (slot && !slot.disabled) {
-      selectedId = slot.dataset.id;
+      selectedId = slot.dataset.id === selectedId ? null : slot.dataset.id;   // 다시 누르면 선택 해제
       renderBooking();
-      if (window.innerWidth < 860) {
-        document.getElementById("confirmBox").scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
     }
-    if (e.target.id === "bookBtn") {
-      const s = SLOTS.find((x) => x.id === selectedId);
-      if (!s) return;
-      writeJSON(BOOKING_KEY, {
-        slotId: s.id, studyId: study.id, start: s.start, end: s.end,
-        tz: viewTz(), bookedAt: new Date().toISOString()
-      });
-      renderBooking();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+  });
+
+  // 예약 버튼 (오른쪽 카드와 모바일 하단 바 공통)
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-action=book]")) return;
+    const s = SLOTS.find((x) => x.id === selectedId);
+    if (!s) return;
+    writeJSON(BOOKING_KEY, {
+      slotId: s.id, studyId: study.id, start: s.start, end: s.end,
+      tz: viewTz(), bookedAt: new Date().toISOString()
+    });
+    renderBooking();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
   document.getElementById("doneBox").addEventListener("click", async (e) => {
